@@ -22,7 +22,7 @@ export const RegisterView = () => {
         try {
             await api.post('/api/auth/register', formData);
             setLog("Matricule créé avec succès ! Connectez-vous.", "success");
-            navigate('/login');
+            navigate('/lobby');
         } catch (err) {
             let errorMsg = "Échec de l'enrôlement réseau";
             if (axios.isAxiosError(err)) errorMsg = err.response?.data.message || err.message;

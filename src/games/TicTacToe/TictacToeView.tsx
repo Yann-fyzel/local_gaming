@@ -18,6 +18,8 @@ export const TicTacToeView = () => {
     const user = useAuthStore(s => s.user)
     const addLog = useLogStore((s) => s.addLog);
     const [game, setGame] = useState<GameState | null>(null);
+    const [gameMode, setGameMode] = useState<'pvp' | 'ai' | null>(null);
+
     const [roomId, setRoomId] = useState<string>("");
     const myTurn = (game?.xIsNext && game?.players[0] === socket?.id) ||
         (!game?.xIsNext && game?.players[1] === socket?.id);
@@ -44,30 +46,39 @@ export const TicTacToeView = () => {
         socket.on("ttt:update", onUpdate);
         socket.on("ttt:player_ready", onUpdate);
 
-        // ✅ La fonction qui émet
-        const startSearch = () => {
-            if (!hasJoined.current) {
-                socket.emit("ttt:find_match");
-                hasJoined.current = true;
-            }
-        };
 
-        // Si déjà connecté, on lance, sinon on attend l'event 'connect'
-        if (socket.connected) {
-            startSearch();
-        } else {
-            socket.once("connect", startSearch);
-        }
 
         return () => {
             socket.off("ttt:match_found", onMatchFound);
             socket.off("ttt:update", onUpdate);
-            socket.off("connect", startSearch);
             socket.off("ttt:player_ready", onUpdate);
             // On ne remet pas la ref à false pour bloquer le StrictMode
         };
     }, [addLog, socket]);
+    // ✅ La fonction qui émet
+    const startPvP = () => {
+        setGameMode('pvp');
+        socket?.emit("ttt:find_match", false);
+    }
 
+
+    const startAI = () => {
+        setGameMode('ai');
+        socket?.emit("ttt:find_match", true)
+    }
+
+
+    if (!gameMode) return (<div className="menu flex flex-col gap-3">
+        <h2>Choisir le mode de jeu</h2>
+        <button type="button"
+            onClick={startPvP}
+            className="w-full py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase text-white shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:shadow-[0_10px_25px_rgba(6,182,212,0.5)] active:scale-95 transition-all">
+            Jouer contre un Humain</button>
+        <button type="button"
+            onClick={startAI}
+            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase text-slate-400 hover:bg-white/10 hover:text-white active:scale-95 transition-all">
+            Jouer contre l'IA</button>
+    </div>)
 
 
     if (!game) return (
@@ -168,7 +179,7 @@ export const TicTacToeView = () => {
                             {/* Action Principale : Rejouer */}
                             <button
                                 type='button'
-                                onClick={() => { setGame(null); hasJoined.current = false; socket?.emit("ttt:find_match") }}
+                                onClick={() => { setGame(null); setGameMode(null); hasJoined.current = false; }}
                                 className="w-full py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase text-white shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:shadow-[0_10px_25px_rgba(6,182,212,0.5)] active:scale-95 transition-all"
                             >
                                 RECHARGER LA PARTIE
