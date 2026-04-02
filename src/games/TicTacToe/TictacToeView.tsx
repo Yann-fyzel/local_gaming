@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSocket } from '../../hooks/useSocket.js';
 import { useLogStore } from '../../store/useLogStore.js';
 import { Trophy } from 'lucide-react';
@@ -14,7 +14,6 @@ interface GameState {
 
 export const TicTacToeView = () => {
     const socket = useSocket();
-    const hasJoined = useRef(false);
     const user = useAuthStore(s => s.user)
     const addLog = useLogStore((s) => s.addLog);
     const [game, setGame] = useState<GameState | null>(null);
@@ -179,7 +178,7 @@ export const TicTacToeView = () => {
                             {/* Action Principale : Rejouer */}
                             <button
                                 type='button'
-                                onClick={() => { setGame(null); setGameMode(null); hasJoined.current = false; }}
+                                onClick={() => { setGame(null); setGameMode(null); }}
                                 className="w-full py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase text-white shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:shadow-[0_10px_25px_rgba(6,182,212,0.5)] active:scale-95 transition-all"
                             >
                                 RECHARGER LA PARTIE
@@ -188,7 +187,7 @@ export const TicTacToeView = () => {
                             {/* Action Secondaire : Lobby (Style Outline/Ghost) */}
                             <button
                                 type='button'
-                                onClick={() => { setGame(null); hasJoined.current = false; window.location.href = "/lobby"; }}
+                                onClick={() => { window.location.href = "/lobby"; setGame(null); setGameMode(null); }}
                                 className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase text-slate-400 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
                             >
                                 RETOUR AU LOBBY
